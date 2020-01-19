@@ -36,6 +36,8 @@ private:
 	int cap_width_, cap_height_;
 	int width_, height_, framerate_;
 	int flip_method_;
+	int grayscale_;
+	int output_resize_;
 	std::string frame_id_;
 	double delay_;
 	sensor_msgs::CameraInfo cam_info_;
@@ -59,6 +61,8 @@ private:
 		framerate_ = nh_priv_.param<int>("fps", 60);
 
 		flip_method_ = nh_priv_.param<int>("flip_method", 0);
+		grayscale_ = nh_priv_.param<int>("grayscale", 0);
+		output_resize_ = nh_priv_.param<int>("output_resize", 0);
 
 		frame_id_ = nh_priv_.param<std::string>("frame_id", "main_camera_optical");
 		delay_ = nh_priv_.param<double>("capture_delay", 0.0);
@@ -108,13 +112,30 @@ private:
 		NODELET_INFO("Pipeline: %s", pipeline.c_str());
 		cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
 		cv_bridge::CvImage img;
-		img.encoding = sensor_msgs::image_encodings::BGR8;
+		// cv_bridge::CvImage monoImg;
+        cv::Rect roi = cv::Rect(40, 0, 240, 240);
+        if (grayscale_ == 1) {
+            img.encoding = sensor_msgs::image_encodings::MONO8;
+        }
+        else {
+            img.encoding = sensor_msgs::image_encodings::BGR8;
+        }
 		img.header.frame_id = frame_id_;
 
 		while (is_running_.load())
 		{
 			if (cap.read(img.image))
 			{
+                
+                if (grayscale_ == 1) {
+                    cv::cvtColor(img.image, img.image, cv::COLOR_BGR2GRAY);
+                }
+                if (output_resize_ == 1) {
+                    img.image = img.image(roi);
+                    cv::resize(img.image, img.image, cv::Size(0, 0), 0.5, 0.5);
+                }
+                
+                
 				img.header.stamp = ros::Time::now() - ros::Duration(delay_);
 				cam_info_.header.stamp = img.header.stamp;
 				pub_.publish(*img.toImageMsg(), cam_info_);
