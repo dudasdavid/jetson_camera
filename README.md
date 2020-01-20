@@ -8,6 +8,8 @@ The node(let) is based on the [JetsonHacks' Jetson Nano CSI repository](https://
 * `width`, `height` (*int*, default: 640, 480) - Width and height of the output image.
 * `fps` (*int*, default: 60) - Desired framerate/publish rate [Hz].
 * `flip_method` (*int*, default 0) - Image rotation/flipping. `0` for no rotation, see detailed description [at JetsonHacks](https://github.com/JetsonHacksNano/CSI-Camera#gstreamer-parameter).
+* `grayscale` (*int*, default 0) - Convert camera image to grayscale. `0` for no conversion, `1` for conversion.
+* `output_resize` (*int*, default 0) - Resize output image. `0` for no resize, `1` for 120x120 output image. Nvidia's nvvidconv doesn't support smaller resolution than 320x240. Scale and ROI is hardcoded in nodelet.
 * `frame_id` (*string*, default: "main_camera_optical")- Camera frame name.
 * `capture_delay` (*double*, default: 0) - Additional time (in seconds) that is **substracted** from the timestamp. Allows to compensate for capture delays.
 * `topic_name` (*string*, default: "image_raw") - Image topic name.
